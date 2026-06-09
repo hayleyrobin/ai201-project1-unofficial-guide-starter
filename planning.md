@@ -8,9 +8,11 @@
 ---
 
 ## Domain
-
-<!-- What domain did you choose? Why is this knowledge valuable and hard to find through official channels? -->
-
+UCLA professor reviews across Computer Science and related 
+departments, sourced from Rate My Professors. This knowledge 
+is valuable because official university channels don't share 
+student opinions on teaching style, exam difficulty, or 
+grading — the stuff students actually need to pick classes.
 ---
 
 ## Documents
@@ -19,17 +21,17 @@
      Aim for at least 10 sources that together cover different subtopics or perspectives within your domain. -->
 
 | # | Source | Description | URL or location |
-|---|--------|-------------|-----------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
-| 6 | | | |
-| 7 | | | |
-| 8 | | | |
-| 9 | | | |
-| 10 | | | |
+|---|--------|-------------|ratemyprofessors.com|
+| 1 |Rate My Professors |Reviews for David Smallberg (CS) |ratemyprofessors.com |
+| 2 |Rate My Professors |Reviews for Deb Pires (CS) |ratemyprofessors.com |
+| 3 |Rate My Professors |Reviews for Jordan Mendler (CS) |ratemyprofessors.com |
+| 4 |Rate My Professors |Reviews for Navid Amini (CS) |ratemyprofessors.com |
+| 5 |Rate My Professors |Reviews for Paul Eggert (CS) |ratemyprofessors.com |
+| 6 |Rate My Professors |Reviews for Rebecca Emigh(CS) |ratemyprofessors.com |
+| 7 |Rate My Professors |Reviews for Richard Korf (CS) |ratemyprofessors.com |
+| 8 |Rate My Professors |Reviews for T.C Wittman (CS) |ratemyprofessors.com |
+| 9 |Rate My Professors |Reviews for Taimie Bryant(CS) |ratemyprofessors.com |
+| 10 |Rate My Professors |Reviews for Terri Anderson (CS) |ratemyprofessors.com |
 
 ---
 
@@ -41,11 +43,15 @@
      A review-heavy corpus warrants different chunking than a long FAQ. -->
 
 **Chunk size:**
-
+500 characters per chunk
 **Overlap:**
-
+50 characters of overlap
 **Reasoning:**
-
+Since Rate My Professors reviews are 
+short and self-contained (usually 2-4 sentences each), 500 
+characters captures roughly one full review per chunk. The 
+50-character overlap prevents important context from being 
+lost at chunk boundaries.
 ---
 
 ## Retrieval Approach
@@ -57,11 +63,18 @@
      support, accuracy on domain-specific text, latency? -->
 
 **Embedding model:**
-
+all-MiniLM-L6-v2 via sentence-transformers.
+This runs locally with no API key or cost.
 **Top-k:**
-
+4 chunks per query. This gives the LLM enough context 
+to form a good answer without diluting it with loosely related 
+results.
 **Production tradeoff reflection:**
-
+For a production system, tradeoffs to consider would include:
+- Cost: API-based models like OpenAI embeddings cost per token
+- Context length: some models handle longer text better
+- Accuracy: larger models are more accurate but slower
+- Local vs API: local models are free but require more setup
 ---
 
 ## Evaluation Plan
@@ -73,11 +86,11 @@
 
 | # | Question | Expected answer |
 |---|----------|-----------------|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
+| 1 |What do students say about Professor Smallberg's lectures? |Reviews mention whether lectures are long, detailed, interesting, etc. |
+| 2 | Is Professor Smallberg a good professor for beginners?  |Reviews mention whether the professor is approachable and explains concepts clearly |
+| 3 |How is Professor Rebecca Emigh's grading?  |Reviews mention grading style, fairness, and curve policy  |
+| 4 |Does Professor Mendler give oppurtunities for improvement? |Reviews mention whether feedback is detailed or unhelpful |
+| 5 | Which professor has the best teaching style?|Reviews from multiple professors compared, specific teaching traits mentioned  |
 
 ---
 
@@ -87,9 +100,14 @@
      Consider: noisy or inconsistent documents, missing source attribution, off-topic
      retrieval, chunks that split key information across boundaries. -->
 
-1.
+1. Chunk boundary splits: a single review might get cut across 
+two chunks, meaning neither chunk has the complete opinion. 
+This could cause retrieval to return incomplete context.
 
-2.
+2. Cross-document queries: questions that compare multiple 
+professors require retrieving relevant chunks from different 
+files simultaneously, which may return inconsistent or 
+incomplete results.
 
 ---
 
@@ -101,6 +119,30 @@
      You can use ASCII art, a Mermaid diagram, or embed a sketch as an image.
      You'll use this diagram as context when prompting AI tools to implement each stage. -->
 
+```
+Documents (.txt files)
+        |
+        v
+[Document Ingestion] -- pdfplumber / plain text loader
+        |
+        v
+[Chunking] -- 500 char chunks, 50 char overlap
+        |
+        v
+[Embedding] -- sentence-transformers (all-MiniLM-L6-v2)
+        |
+        v
+[Vector Store] -- ChromaDB
+        |
+        v
+[Retrieval] -- top-4 semantic search
+        |
+        v
+[Generation] -- Groq (llama-3.3-70b-versatile)
+        |
+        v
+[Response + Source Citation]
+```
 ---
 
 ## AI Tool Plan
@@ -114,6 +156,19 @@
      "I'll use AI to help me code" is not a plan.
      "I'll give Claude my Chunking Strategy section and ask it to implement chunk_text()
      with my specified chunk size and overlap" is a plan. -->
+   
+1. Chunking and ingestion code: I will share my chunking 
+strategy section with Claude and ask it to implement the 
+chunk_text() function that splits documents by 500 characters 
+with 50 character overlap.
+
+2. Retrieval code: I will share my retrieval approach section 
+and pipeline diagram with Claude and ask it to implement the 
+embedding and ChromaDB storage functions.
+
+3. Generation code: I will share my grounding requirements 
+with Claude and ask it to write the prompt template and Groq 
+API connection.
 
 **Milestone 3 — Ingestion and chunking:**
 
