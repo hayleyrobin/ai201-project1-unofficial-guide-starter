@@ -43,7 +43,7 @@ grading — the stuff students actually need to pick classes.
      A review-heavy corpus warrants different chunking than a long FAQ. -->
 
 **Chunk size:**
-500 characters per chunk
+300 characters per chunk
 **Overlap:**
 50 characters of overlap
 **Reasoning:**
@@ -159,7 +159,7 @@ Documents (.txt files)
    
 1. Chunking and ingestion code: I will share my chunking 
 strategy section with Claude and ask it to implement the 
-chunk_text() function that splits documents by 500 characters 
+chunk_text() function that splits documents by 300 characters 
 with 50 character overlap.
 
 2. Retrieval code: I will share my retrieval approach section 
